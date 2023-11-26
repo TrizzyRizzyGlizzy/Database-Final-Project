@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Nov 26, 2023 at 10:11 PM
+-- Generation Time: Nov 26, 2023 at 11:28 PM
 -- Server version: 5.6.13
 -- PHP Version: 5.4.17
 
@@ -25,19 +25,38 @@ USE `tmk_estore`;
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `auditlogs`
+-- Tabe will be used for auditing process
+
+CREATE TABLE IF NOT EXISTS `auditlogs` (
+  `LogID` int(11) NOT NULL,
+  `UserID` int(11) DEFAULT NULL,
+  `Action` varchar(100) NOT NULL,
+  `Timestamp` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`LogID`),
+  KEY `UserID` (`UserID`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `auditlogs`
+--
+
+INSERT INTO `auditlogs` (`LogID`, `UserID`, `Action`, `Timestamp`) VALUES
+(1111, 2001, 'Update Inventory', '2023-11-25 00:00:00');
+
+-- --------------------------------------------------------
+--
 -- Table structure for table `categories`
--- Table will refer to the type of catergories which the store offers.
+-- Table will refer to the type of categories which the store offers.
 
 CREATE TABLE IF NOT EXISTS `categories` (
   `CategoryID` int(11) NOT NULL,
   `CategoryName` varchar(50) DEFAULT NULL,
   PRIMARY KEY (`CategoryID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
 --
 -- Dumping data for table `categories`
 --
-
 INSERT INTO `categories` (`CategoryID`, `CategoryName`) VALUES
 (1, 'Produce'),
 (2, 'Dairy Product'),
@@ -53,7 +72,8 @@ INSERT INTO `categories` (`CategoryID`, `CategoryName`) VALUES
 
 --
 -- Table structure for table `customers`
--- Table will refer to the users even admin as customer.
+-- Table will refer to the users, even admin as customer.
+
 
 CREATE TABLE IF NOT EXISTS `customers` (
   `CustomerID` int(11) NOT NULL,
@@ -85,6 +105,7 @@ INSERT INTO `customers` (`CustomerID`, `FirstName`, `LastName`, `Email`, `PhoneN
 -- Table structure for table `orderitems`
 -- Table will references to the Order, Product and create and Order Item ID.
 
+
 CREATE TABLE IF NOT EXISTS `orderitems` (
   `OrderItemID` int(11) NOT NULL,
   `OrderID` int(11) DEFAULT NULL,
@@ -107,24 +128,8 @@ INSERT INTO `orderitems` (`OrderItemID`, `OrderID`, `ProductID`, `Quantity`, `Su
 -- --------------------------------------------------------
 
 --
--- Table structure for table `orderpromotions`
--- Table is created and data will enter once the survey is done. The online store will determine to offer a promotion on certain Order made by customer.
-
-CREATE TABLE IF NOT EXISTS `orderpromotions` (
-  `OrderPromotionID` int(11) NOT NULL,
-  `OrderID` int(11) DEFAULT NULL,
-  `PromotionID` int(11) DEFAULT NULL,
-  PRIMARY KEY (`OrderPromotionID`),
-  KEY `idx_OrderPromotions_OrderID` (`OrderID`),
-  KEY `idx_OrderPromotions_PromotionID` (`PromotionID`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
--- --------------------------------------------------------
-
---
 -- Table structure for table `orders`
--- Table will refer to orders made by the customer. 
--- Table will reference to User and Shipping Adress table.
+--
 
 CREATE TABLE IF NOT EXISTS `orders` (
   `OrderID` int(11) NOT NULL,
@@ -139,8 +144,10 @@ CREATE TABLE IF NOT EXISTS `orders` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
--- Dumping data for table `orders`
---
+-- Table structure for table `orders`
+-- Table will refer to orders made by the customer.
+-- Table will reference the User and Shipping Address table.
+
 
 INSERT INTO `orders` (`OrderID`, `UserID`, `OrderDate`, `TotalAmount`, `ShippingAddressID`, `DiscountCode`) VALUES
 (9000, 2001, '2023-10-31', '119.97', 1001001, 'dsw'),
@@ -151,7 +158,8 @@ INSERT INTO `orders` (`OrderID`, `UserID`, `OrderDate`, `TotalAmount`, `Shipping
 
 --
 -- Table structure for table `payments`
--- Table will store the form of payment and determine the status of each order made. 
+-- Table will store the form of payment and determine the status of each order made.
+
 
 CREATE TABLE IF NOT EXISTS `payments` (
   `PaymentID` int(11) NOT NULL,
@@ -172,22 +180,34 @@ INSERT INTO `payments` (`PaymentID`, `OrderID`, `PaymentDate`, `Amount`, `Paymen
 (123, 9000, '2023-11-02', '119.97', 'Cash', 'Pending'),
 (1234, 9002, '2023-11-14', '200.00', 'Credit Card', 'Paid');
 
---
--- Constraints for dumped tables
---
-
---
--- Constraints for table `payments`
---
-ALTER TABLE `payments`
-  ADD CONSTRAINT `payments_ibfk_1` FOREIGN KEY (`OrderID`) REFERENCES `orders` (`OrderID`);
-
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `permissions`
+-- Table is to estable permission to the online store databas.
+
+CREATE TABLE IF NOT EXISTS `permissions` (
+  `PermissionID` int(11) NOT NULL,
+  `PermissionName` varchar(50) NOT NULL,
+  PRIMARY KEY (`PermissionID`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `permissions`
+--
+
+INSERT INTO `permissions` (`PermissionID`, `PermissionName`) VALUES
+(3000, 'Admin'),
+(3001, 'Admin'),
+(3002, 'User'),
+(3003, 'User');
+
+-- --------------------------------------------------------
+
 -- Table structure for table `products`
 -- Table will store and display all the products the online store is offering.
 -- Table sort them by an ID which is determine by its connection to the catergory table.
+
 
 CREATE TABLE IF NOT EXISTS `products` (
   `ProductID` int(11) NOT NULL,
@@ -241,6 +261,7 @@ CREATE TABLE IF NOT EXISTS `promotions` (
 -- Table structure for table `shippingaddresses`
 -- Table will store and display the shipping information for each user to the online store.
 
+
 CREATE TABLE IF NOT EXISTS `shippingaddresses` (
   `ShippingAddressID` int(11) NOT NULL,
   `UserID` int(11) DEFAULT NULL,
@@ -263,6 +284,27 @@ INSERT INTO `shippingaddresses` (`ShippingAddressID`, `UserID`, `Address`, `City
 (1001004, 2004, '78 Neal Pen Road', 'Belize City', 'Belize', '+210'),
 (1001005, 2005, 'Sandhill', NULL, 'Orange Walk', '+214'),
 (1001006, 2006, '01 Faber Roads', NULL, 'Corozal', '+215');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `userpermissions`
+-- Table will store or display or assign persmission per user.
+
+CREATE TABLE IF NOT EXISTS `userpermissions` (
+  `UserID` int(11) DEFAULT NULL,
+  `PermissionID` int(11) DEFAULT NULL,
+  KEY `UserID` (`UserID`),
+  KEY `PermissionID` (`PermissionID`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `userpermissions`
+--
+
+INSERT INTO `userpermissions` (`UserID`, `PermissionID`) VALUES
+(2001, 3000),
+(2007, 3003);
 
 -- --------------------------------------------------------
 
@@ -303,18 +345,17 @@ INSERT INTO `users` (`UserID`, `CustomerID`, `Username`, `PasswordHash`, `IsAdmi
 --
 
 --
+-- Constraints for table `auditlogs`
+--
+ALTER TABLE `auditlogs`
+  ADD CONSTRAINT `auditlogs_ibfk_1` FOREIGN KEY (`UserID`) REFERENCES `users` (`UserID`);
+
+--
 -- Constraints for table `orderitems`
 --
 ALTER TABLE `orderitems`
   ADD CONSTRAINT `orderitems_ibfk_1` FOREIGN KEY (`OrderID`) REFERENCES `orders` (`OrderID`),
   ADD CONSTRAINT `orderitems_ibfk_2` FOREIGN KEY (`ProductID`) REFERENCES `products` (`ProductID`);
-
---
--- Constraints for table `orderpromotions`
---
-ALTER TABLE `orderpromotions`
-  ADD CONSTRAINT `orderpromotions_ibfk_1` FOREIGN KEY (`OrderID`) REFERENCES `orders` (`OrderID`),
-  ADD CONSTRAINT `orderpromotions_ibfk_2` FOREIGN KEY (`PromotionID`) REFERENCES `promotions` (`PromotionID`);
 
 --
 -- Constraints for table `orders`
@@ -342,6 +383,13 @@ ALTER TABLE `shippingaddresses`
   ADD CONSTRAINT `shippingaddresses_ibfk_1` FOREIGN KEY (`UserID`) REFERENCES `users` (`UserID`);
 
 --
+-- Constraints for table `userpermissions`
+--
+ALTER TABLE `userpermissions`
+  ADD CONSTRAINT `userpermissions_ibfk_1` FOREIGN KEY (`UserID`) REFERENCES `users` (`UserID`),
+  ADD CONSTRAINT `userpermissions_ibfk_2` FOREIGN KEY (`PermissionID`) REFERENCES `permissions` (`PermissionID`);
+
+--
 -- Constraints for table `users`
 --
 ALTER TABLE `users`
@@ -351,6 +399,16 @@ ALTER TABLE `users`
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+
+
+
+
+
+
+
+
+
+
+
+
+
